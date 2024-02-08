@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet with GeoJSON Overlay</title>
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 100vh;
+            width: calc(100% - 300px); /* Adjust map width to accommodate sidebar */
+            float: left;
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100vh;
+            background-color: #f0f0f0;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #searchbar {
+            position: fixed;
+            top: 100px;
+            left: 100px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="searchbar">
+    <input type="text" id="searchInput" placeholder="Search...">
+    <button onclick="filterFeatures()">Search</button>
+</div>
+
+<div id="map"></div>
+
+<div id="sidebar"></div>
+
+<script>
+    var map = L.map('map').setView([7.9465, -1.0232], 7); // Set center and zoom level
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var sidebar = document.getElementById('sidebar');
+    var searchInput = document.getElementById('searchInput');
+
+    // Listen for click event on the map
+    map.on('click', function (e) {
+        var clickedPoint = e.latlng; // Get clicked coordinates
+    });
+
+   
+
+    fetch('map_data/Ghana_New_260_District.geojson').then(response => response.json()).then(data => {
+        L.geoJSON(data, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup('REGION: ' + feature.properties.REGION + '<br>DISTRICT: ' + feature.properties.DISTRICT);
+            }
+        }).addTo(map);
+    });
+
+    function filterFeatures() {
+        var searchString = searchInput.value.toLowerCase();
+        sidebar.innerHTML = ''; // Clear sidebar
+        fetch('map_data/Ghana_New_260_District.geojson').then(response => response.json()).then(data => {
+            L.geoJSON(data, {
+                filter: function (feature) {
+                    return feature.properties.REGION.toLowerCase().includes(searchString) || feature.properties.DISTRICT.toLowerCase().includes(searchString);
+                },
+                onEachFeature: function (feature, layer) {
+                    sidebar.innerHTML += '<h3>REGION: ' + feature.properties.REGION + '</h3>' + '<p>DISTRICT: ' + feature.properties.DISTRICT + '</p>';
+                }
+            }).addTo(map);
+        });
+    }
+</script>
+</body>
+</html>
