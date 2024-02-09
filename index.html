@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet with GeoJSON Overlay</title>
+    <title>CSA Map</title>
     <!-- Include Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <style>
+  <style>
         #map {
             height: 100vh;
             width: calc(100% - 300px); /* Adjust map width to accommodate sidebar */
@@ -24,6 +24,7 @@
             padding: 20px;
             overflow-y: auto;
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000; /* Ensure sidebar is above map */
         }
 
         #searchbar {
@@ -36,12 +37,34 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+
+        .project-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        .project-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .project-description {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .project-info {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 <div id="searchbar">
-    <input type="text" id="searchInput" placeholder="Search...">
-    <button onclick="filterFeatures()">Search</button>
+    <input type="text" id="searchInput" placeholder="Search..." onkeypress="searchOnEnter(event)">
+    <button onclick="filterResults()">Search</button>
 </div>
 
 <div id="map"></div>
@@ -60,32 +83,75 @@
     // Listen for click event on the map
     map.on('click', function (e) {
         var clickedPoint = e.latlng; // Get clicked coordinates
+        displayDistrictInfo(feature.properties.DISTRICT.toLowerCase());
     });
 
    
 
-    fetch('map_data/Ghana_New_260_District.geojson').then(response => response.json()).then(data => {
-        L.geoJSON(data, {
-            onEachFeature: function (feature, layer) {
-                layer.bindPopup('REGION: ' + feature.properties.REGION + '<br>DISTRICT: ' + feature.properties.DISTRICT);
-            }
-        }).addTo(map);
-    });
-
-    function filterFeatures() {
-        var searchString = searchInput.value.toLowerCase();
-        sidebar.innerHTML = ''; // Clear sidebar
-        fetch('map_data/Ghana_New_260_District.geojson').then(response => response.json()).then(data => {
+   fetch('map_data/Ghana_New_260_District.geojson')
+        .then(response => response.json())
+        .then(data => {
             L.geoJSON(data, {
-                filter: function (feature) {
-                    return feature.properties.REGION.toLowerCase().includes(searchString) || feature.properties.DISTRICT.toLowerCase().includes(searchString);
-                },
                 onEachFeature: function (feature, layer) {
-                    sidebar.innerHTML += '<h3>REGION: ' + feature.properties.REGION + '</h3>' + '<p>DISTRICT: ' + feature.properties.DISTRICT + '</p>';
+                    layer.on('click', function (e) {
+                        var districtName = feature.properties.DISTRICT;
+                        //console.log(districtName);
+                        displayDistrictInfo(districtName);
+                    });
+                    layer.bindPopup('REGION: ' + feature.properties.REGION + '<br>DISTRICT: ' + feature.properties.DISTRICT);
                 }
             }).addTo(map);
         });
+
+    var jsonData = []; // Array to store JSON data
+
+    fetch('ngo_data/csvjson.json')
+        .then(response => response.json())
+        .then(data => {
+            jsonData = data; // Store JSON data
+        });
+
+    function filterResults() {
+        var searchString = searchInput.value.toLowerCase();
+        sidebar.innerHTML = ''; // Clear sidebar
+        var matchingProjects = jsonData.filter(project => {
+            // Customize the filtering logic based on your requirements
+            return project["Name of Project"].toLowerCase().includes(searchString) ||
+                project["Description"].toLowerCase().includes(searchString) ||
+                project["Region"].toLowerCase().includes(searchString) ||
+                project["District"].toLowerCase().includes(searchString);
+        });
+
+        // Display matching projects in the sidebar
+        matchingProjects.forEach(project => {
+            sidebar.innerHTML += '<h3>' + project["Name of Project"] + '</h3>' +
+                '<p>Description: ' + project["Description"] + '</p>' +
+                '<p>Region: ' + project["Region"] + '</p>' +
+                '<p>District: ' + project["District"] + '</p>' +
+                '<hr>';
+        });
     }
+
+    function searchOnEnter(event) {
+        if (event.key === 'Enter') {
+            filterResults();
+        }
+    }
+
+    function displayDistrictInfo(districtName) {
+        // Check if the district exists in the JSON data
+        var districtData = jsonData.filter(project => project["District"].toLowerCase().includes(districtName.toLowerCase()) );
+        sidebar.innerHTML = ''; // Clear sidebar
+        // Display matching projects in the sidebar
+        districtData.forEach(project => {
+            sidebar.innerHTML += '<h3>' + project["Name of Project"] + '</h3>' +
+                '<p>Description: ' + project["Description"] + '</p>' +
+                '<p>Region: ' + project["Region"] + '</p>' +
+                '<p>District: ' + project["District"] + '</p>' +
+                '<hr>';
+        });
+    }
+
 </script>
 </body>
 </html>
