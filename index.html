@@ -1,157 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSA Map</title>
-    <!-- Include Leaflet CSS and JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <style>
-        #map {
-            height: 100vh;
-            width: calc(100% - 300px); /* Adjust map width to accommodate sidebar */
-            float: left;
-        }
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>CSA Map</title>
+		<!-- Include Leaflet CSS and JS -->
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"/>
+		<link rel="stylesheet" href="assets/css/index.css">
 
-        #sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 100vh;
-            background-color: #f0f0f0;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000; /* Ensure sidebar is above map */
-        }
+	</head>
 
-        #searchbar {
-            position: fixed;
-            top: 100px;
-            left: 100px;
-            z-index: 1000;
-            background-color: white;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+	<body>
 
-        .project-item {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #fff;
-        }
+		<div id="searchbar" class="ui container mt-3">
+			<div class="ui centered grid">
+				<div class="row">
+					<div class="column">
+						<div class="ui action input">
+							<input type="text" id="searchInput" placeholder="Search..." onkeypress="searchOnEnter(event)">
+							<button class="ui button" onclick="filterResults()">Search</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-        .project-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
 
-        .project-description {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
+		<div id="map"></div>
 
-        .project-info {
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-<div id="searchbar">
-    <input type="text" id="searchInput" placeholder="Search..." onkeypress="searchOnEnter(event)">
-    <button onclick="filterResults()">Search</button>
-</div>
+		<div id="sidebar" class="ui segment"></div>
 
-<div id="map"></div>
+        <div class="ui modal">
+				<i class="close icon"></i>
+				<div class="header">Full Project Details</div>
+				<div
+					class="content">
+					<!-- Full project details content here -->
+					<p>Full project description...</p>
+				</div>
+			</div>
 
-<div id="sidebar"></div>
+		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+		<script src='assets/js/index.js'></script>
 
-<script>
-    var map = L.map('map').setView([7.9465, -1.0232], 7); // Set center and zoom level
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    var sidebar = document.getElementById('sidebar');
-    var searchInput = document.getElementById('searchInput');
-
-    // Listen for click event on the map
-    map.on('click', function (e) {
-        var clickedPoint = e.latlng; // Get clicked coordinates
-        displayDistrictInfo(feature.properties.DISTRICT.toLowerCase());
-    });
-
-   
-
-   fetch('map_data/Ghana_New_260_District.geojson')
-        .then(response => response.json())
-        .then(data => {
-            L.geoJSON(data, {
-                onEachFeature: function (feature, layer) {
-                    layer.on('click', function (e) {
-                        var districtName = feature.properties.DISTRICT;
-                        //console.log(districtName);
-                        displayDistrictInfo(districtName);
-                    });
-                    layer.bindPopup('REGION: ' + feature.properties.REGION + '<br>DISTRICT: ' + feature.properties.DISTRICT);
-                }
-            }).addTo(map);
-        });
-
-    var jsonData = []; // Array to store JSON data
-
-    fetch('ngo_data/csvjson.json')
-        .then(response => response.json())
-        .then(data => {
-            jsonData = data; // Store JSON data
-        });
-
-    function filterResults() {
-        var searchString = searchInput.value.toLowerCase();
-        sidebar.innerHTML = ''; // Clear sidebar
-        var matchingProjects = jsonData.filter(project => {
-            // Customize the filtering logic based on your requirements
-            return project["Name of Project"].toLowerCase().includes(searchString) ||
-                project["Description"].toLowerCase().includes(searchString) ||
-                project["Region"].toLowerCase().includes(searchString) ||
-                project["District"].toLowerCase().includes(searchString);
-        });
-
-        // Display matching projects in the sidebar
-        matchingProjects.forEach(project => {
-            sidebar.innerHTML += '<h3>' + project["Name of Project"] + '</h3>' +
-                '<p>Description: ' + project["Description"] + '</p>' +
-                '<p>Region: ' + project["Region"] + '</p>' +
-                '<p>District: ' + project["District"] + '</p>' +
-                '<hr>';
-        });
-    }
-
-    function searchOnEnter(event) {
-        if (event.key === 'Enter') {
-            filterResults();
-        }
-    }
-
-    function displayDistrictInfo(districtName) {
-        // Check if the district exists in the JSON data
-        var districtData = jsonData.filter(project => project["District"].toLowerCase().includes(districtName.toLowerCase()) );
-        sidebar.innerHTML = ''; // Clear sidebar
-        // Display matching projects in the sidebar
-        districtData.forEach(project => {
-            sidebar.innerHTML += '<h3>' + project["Name of Project"] + '</h3>' +
-                '<p>Description: ' + project["Description"] + '</p>' +
-                '<p>Region: ' + project["Region"] + '</p>' +
-                '<p>District: ' + project["District"] + '</p>' +
-                '<hr>';
-        });
-    }
-
-</script>
-</body>
+	</body>
 </html>

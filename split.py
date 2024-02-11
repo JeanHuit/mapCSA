@@ -3,7 +3,7 @@
 import pandas as pd
 
 # Read the Excel file into a pandas DataFrame
-df = pd.read_excel('ngo_data/2024_NGO and GVT Dataset.xlsx')
+df = pd.read_excel('data/ngo_data/2024_NGO and GVT Dataset.xlsx')
 
 # Define the dictionary to map abbreviated regions to their full names
 region_mapping = {
@@ -63,14 +63,14 @@ for index, row in df.iterrows():
 new_df = pd.DataFrame(new_rows)
 
 # Write the new DataFrame to a new Excel file
-new_df.to_excel('ngo_data/new.xlsx', index=False)
+new_df.to_excel('data/ngo_data/new.xlsx', index=False)
 
 
 
 
 
 # Read the Excel file into a pandas DataFrame
-df = pd.read_excel('ngo_data/new.xlsx')
+df = pd.read_excel('data/ngo_data/new.xlsx')
 
 # Define the dictionary to map abbreviated regions to their full names
 region_mapping = {
@@ -112,4 +112,4 @@ region_mapping = {
 df['Region'] = df['Region'].apply(lambda x: region_mapping.get(str(x).strip(), x))
 
 # Write the updated DataFrame to a new Excel file
-df.to_excel('ngo_data/newer.xlsx', index=False)
+df.to_excel('data/ngo_data/newer.xlsx', index=False)
