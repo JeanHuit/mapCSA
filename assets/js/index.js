@@ -12,16 +12,28 @@ fetch('data/ngo_data/csvjson.json').then(response => response.json()).then(data 
     jsonData = data; // Store JSON data
 });
 
-fetch('data/map_data/Ghana_New_260_District.geojson').then(response => response.json()).then(data => {
+fetch('data/map_data/ghana_regions.geojson').then(response => response.json()).then(data => {
     L.geoJSON(data, {
         onEachFeature: function (feature, layer) {
             layer.on('click', function (e) {
-                var districtName = feature.properties.DISTRICT;
+                var districtName = feature.properties.region;
                 displayDistrictInfo(districtName);
             });
-            layer.bindPopup('REGION: ' + feature.properties.REGION + '<br>DISTRICT: ' + feature.properties.DISTRICT);
-        }
+            // layer.bindPopup('REGION: ' + feature.properties.region + '<br>CAPITAL: ' + feature.properties.capital);
+
+            layer.on({
+                mouseover: function(e) {
+                    var region = feature.properties.region;
+                    var capital = feature.properties.capital;
+                    layer.bindPopup('REGION: ' + region + '<br>CAPITAL: ' + capital).openPopup();
+                },
+                mouseout: function(e) {
+                    layer.closePopup();
+                }
+        });}
     }).addTo(map);
+    
+
 });
 
 function filterResults() {
@@ -45,7 +57,8 @@ function searchOnEnter(event) {
 }
 
 function displayDistrictInfo(districtName) { // Check if the district exists in the JSON data
-    var districtData = jsonData.filter(project => project["District"].toLowerCase().includes(districtName.toLowerCase()));
+
+    var districtData = jsonData.filter(project => project["Region"].toLowerCase().includes(districtName.toLowerCase()));
     sidebar.innerHTML = '';
     // Clear sidebar
     // Display matching projects in the sidebar
