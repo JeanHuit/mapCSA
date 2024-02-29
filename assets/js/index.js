@@ -16,10 +16,9 @@ var cachedIndex = localStorage.getItem('lunrIndex');
 
 fetch('data/ngo_data/csvjson.json').then(response => response.json()).then(data => {
     jsonData = data; // Store JSON data
-    
-// Adds caching ability
-    if (!cachedIndex) 
-    {
+
+    // Adds caching ability
+    if (!cachedIndex) {
         index = lunr(function () {
             this.ref('UID');
             this.field('Name of Project');
@@ -29,24 +28,23 @@ fetch('data/ngo_data/csvjson.json').then(response => response.json()).then(data 
             this.field('System');
             this.field('CSA Technology');
             this.field('subcategory');
-    
-    
+
+
             // Add documents to the index
             jsonData.forEach(function (doc) {
                 this.add(doc);
             }, this);
         });
-    
+
         // Cache the index in local storage
         localStorage.setItem('lunrIndex', JSON.stringify(index));
-    } 
-    else 
-    {
+    }
+    else {
         // If the index exists in the cache, parse it
         index = lunr.Index.load(JSON.parse(cachedIndex));
     }
 
- 
+
 });
 
 fetch('data/map_data/ghana_regions.geojson').then(response => response.json()).then(data => {
@@ -57,19 +55,34 @@ fetch('data/map_data/ghana_regions.geojson').then(response => response.json()).t
                 displayDistrictInfo(districtName);
             });
             // layer.bindPopup('REGION: ' + feature.properties.region + '<br>CAPITAL: ' + feature.properties.capital);
+            var regionName = feature.properties.region;
+            console.log(regionName);
+            var regionProjectsCount = 0; // Initialize the project count for this region
+
+            // Check if the region name contains "Region", if not, append it
+            if (regionName.toLowerCase() !== "greater accra") {
+                regionName += " Region";
+            }
+            // Calculate the total number of projects in this region
+            jsonData.forEach(project => {
+                if (project["Region"].toLowerCase() == regionName.toLowerCase()) {
+                    regionProjectsCount++;
+                }
+            });
 
             layer.on({
-                mouseover: function(e) {
+                mouseover: function (e) {
                     var region = feature.properties.region;
                     var capital = feature.properties.capital;
-                    layer.bindPopup('REGION: ' + region + '<br>CAPITAL: ' + capital).openPopup();
+                    layer.bindPopup('REGION: ' + region + '<br>CAPITAL: ' + capital + '<br>Total Projects: ' + regionProjectsCount).openPopup();
                 },
-                mouseout: function(e) {
+                mouseout: function (e) {
                     layer.closePopup();
                 }
-        });}
+            });
+        }
     }).addTo(map);
-    
+
 
 });
 
@@ -86,7 +99,7 @@ function filterResults() {
         }
     });
 
-   
+
 }
 
 function searchOnEnter(event) {
@@ -101,18 +114,17 @@ function displayDistrictInfo(districtName) { // Check if the district exists in 
     sidebar.innerHTML = '';
     // Clear sidebar
     // Display matching projects in the sidebar
-    if (districtData.length > 0){
+    if (districtData.length > 0) {
         districtData.forEach(project => {
             sidebar.innerHTML += `<div class="ui segment"><h3 class="ui header">${project["Name of Project"]}</h3><p>Description: ${project["Description"]}</p><p>Region: ${project["Region"]}</p><a href="details.html?projectId=${project["UID"]}" class="read-more-link">Read more</a>
             </div>`;
         });
 
     }
-    else
-    {
+    else {
         sidebar.innerHTML += `<div class="ui segment"><p>No data in selected region</p></div>`;
     }
-    
+
 }
 
 
