@@ -74,7 +74,7 @@ fetch('data/map_data/ghana_regions.geojson').then(response => response.json()).t
                 mouseover: function (e) {
                     var region = feature.properties.region;
                     var capital = feature.properties.capital;
-                    layer.bindPopup('REGION: ' + region + '<br>CAPITAL: ' + capital + '<br>Total Projects: ' + regionProjectsCount).openPopup();
+                    layer.bindPopup('Region: ' + region + '<br>Capital: ' + capital + '<br>Total Projects: ' + regionProjectsCount).openPopup();
                 },
                 mouseout: function (e) {
                     layer.closePopup();
