@@ -1,49 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>CSA Map</title>
-		<!-- Include Leaflet CSS and JS -->
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"/>
-		<script src="https://unpkg.com/lunr/lunr.js"></script>
-		<link rel="stylesheet" href="assets/css/index.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSA Map</title>
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://unpkg.com/lunr/lunr.js"></script>
+    <link rel="stylesheet" href="assets/css/index.css">
+</head>
 
-	</head>
+<body>
 
-	<body>
-
-		<div id="searchbar" class="ui container mt-3">
-			<div class="ui centered grid">
-				<div class="row">
-					<div class="column">
-						<div class="ui action input">
-							<input type="text" id="searchInput" placeholder="Search..." onkeypress="searchOnEnter(event)">
-							<button class="ui button" onclick="filterResults()">Search</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<div id="searchbar" class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search..." onkeypress="searchOnEnter(event)">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" onclick="filterResults()">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
-		<div id="map"></div>
+<div id="map"></div>
 
-		<div id="sidebar" class="ui segment"></div>
+<div id="sidebar" class="container mt-3"></div>
 
-        <div class="ui modal">
-				<i class="close icon"></i>
-				<div class="header">Full Project Details</div>
-				<div
-					class="content">
-					<!-- Full project details content here -->
-					<p>Full project description...</p>
-				</div>
-			</div>
+<!-- Bootstrap Modal Structure -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectModalTitle">Project Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-bs-toggle="modal">X</button>
+            </div>
+            <div class="modal-body" id="projectModalBody">
+                <!-- Modal content will be dynamically populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-bs-toggle="modal">Close</button>
+                <!-- You can add additional buttons here if needed -->
+            </div>
+        </div>
+    </div>
+</div>
 
-		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-		<script src='assets/js/index.js'></script>
 
-	</body>
+
+<!-- Include Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- Include Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="assets/js/index.js"></script>
+
+</body>
 </html>

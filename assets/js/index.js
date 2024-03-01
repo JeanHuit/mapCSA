@@ -95,12 +95,20 @@ function filterResults() {
     searchResults.forEach(function (result) {
         var matchingProject = jsonData.find(project => project["UID"] == result.ref); // Find matching project
         if (matchingProject) {
-            sidebar.innerHTML += `<div class="ui segment"><h3 class="ui header">${matchingProject["Name of Project"]}</h3><p>Description: ${matchingProject["Description"]}</p><p>Region: ${matchingProject["Region"]}</p><a href="details.html?projectId=${matchingProject["UID"]}" class="read-more-link">Read more</a></div>`;
+            sidebar.innerHTML += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h6 class="card-title">${matchingProject["Name of Project"]}</h6>
+                        <p class="card-text"><b>Description:</b> ${matchingProject["Description"]}</p>
+                        <p class="card-text"><b>Region:</b> ${matchingProject["Region"]}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary read-more-link" data-project-id="${matchingProject["UID"]}">Read more</a>
+
+                    </div>
+                </div>`;
         }
     });
-
-
 }
+
 
 function searchOnEnter(event) {
     if (event.key === 'Enter') {
@@ -108,24 +116,66 @@ function searchOnEnter(event) {
     }
 }
 
-function displayDistrictInfo(districtName) { // Check if the district exists in the JSON data
-
+function displayDistrictInfo(districtName) {
+    // Check if the district exists in the JSON data
     var districtData = jsonData.filter(project => project["Region"].toLowerCase().includes(districtName.toLowerCase()));
-    sidebar.innerHTML = '';
-    // Clear sidebar
+    sidebar.innerHTML = ''; // Clear sidebar
+
     // Display matching projects in the sidebar
     if (districtData.length > 0) {
         districtData.forEach(project => {
-            sidebar.innerHTML += `<div class="ui segment"><h3 class="ui header">${project["Name of Project"]}</h3><p>Description: ${project["Description"]}</p><p>Region: ${project["Region"]}</p><a href="details.html?projectId=${project["UID"]}" class="read-more-link">Read more</a>
-            </div>`;
+            sidebar.innerHTML += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h6 class="card-title">${project["Name of Project"]}</h6>
+                        <p class="card-text"><b>Description:</b> ${project["Description"]}</p>
+                        <p class="card-text"><b>Region:</b> ${project["Region"]}</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary read-more-link" data-project-id="${project["UID"]}">Read more</a>
+
+                    </div>
+                </div>`;
         });
-
+    } else {
+        sidebar.innerHTML += `<div class="card mb-3"><div class="card-body"><p class="card-text">No data in selected region</p></div></div>`;
     }
-    else {
-        sidebar.innerHTML += `<div class="ui segment"><p>No data in selected region</p></div>`;
-    }
-
 }
+
+// Add a click event listener to the sidebar to handle "Read more" link clicks
+sidebar.addEventListener('click', function(event) {
+    // Check if the clicked element has the "read-more-link" class
+    if (event.target.classList.contains('read-more-link')) {
+        event.preventDefault(); // Prevent default link behavior
+
+        // Extract the projectId from the link's data-project-id attribute
+        const projectId = event.target.getAttribute('data-project-id');
+
+        // Find the matching project in the jsonData array
+        const matchingProject = jsonData.find(project => project["UID"] == projectId);
+
+        // Populate the modal content with project details
+        const modalTitle = document.getElementById('projectModalTitle');
+        const modalBody = document.getElementById('projectModalBody');
+
+        modalTitle.innerText = matchingProject["Name of Project"];
+        modalBody.innerHTML = `
+            <p>Description: ${matchingProject["Description"]}</p>
+            <p>Region: ${matchingProject["Region"]}</p>
+            <p>District: ${matchingProject["District"]}</p>
+            <p>Sponsor-Full: ${matchingProject["Sponsor-Full"]}</p>
+            <p>System: ${matchingProject["System"]}</p>
+            <p>ImplementingAgencies: ${matchingProject["ImplementingAgencies"]}</p>
+            <p>Year Approved: ${matchingProject["Year Approved"]}</p>
+            <p>Year Completed: ${matchingProject["Year Completed"]}</p>
+            <p>Link: <a href= "${matchingProject["Link"]}">${matchingProject["Link"]}</a></p>
+            <p>CSA Technology: ${matchingProject["CSA Technology"]}</p>
+            <p>Beneficiaries: ${matchingProject["Beneficiaries"]}</p>
+        `;
+
+        // Show the modal
+        const myModal = new bootstrap.Modal(document.getElementById('projectModal'));
+        myModal.show();
+    }
+});
 
 
 
