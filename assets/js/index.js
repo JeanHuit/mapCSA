@@ -56,7 +56,7 @@ fetch('data/map_data/ghana_regions.geojson').then(response => response.json()).t
             });
             // layer.bindPopup('REGION: ' + feature.properties.region + '<br>CAPITAL: ' + feature.properties.capital);
             var regionName = feature.properties.region;
-            console.log(regionName);
+            // console.log(regionName);
             var regionProjectsCount = 0; // Initialize the project count for this region
 
             // Check if the region name contains "Region", if not, append it
@@ -129,3 +129,38 @@ function displayDistrictInfo(districtName) { // Check if the district exists in 
 
 
 
+// Define a color scheme for different systems
+var colorScheme = {
+    'Crop Production': '#ff0000', // Red
+    'Fisheries and Aquaculture': '#00ff00', // Green
+    'System3': '#0000ff', // Blue
+    // Add more colors for additional systems as needed
+};
+
+// Group the data based on the "System" column
+var systemGroups = {};
+jsonData.forEach(function(project) {
+    var system = project['System'];
+    if (!systemGroups[system]) {
+        systemGroups[system] = [];
+    }
+    systemGroups[system].push(project);
+});
+
+// Loop through the grouped data and assign colors to each system or cluster
+Object.keys(systemGroups).forEach(function(system) {
+    var color = colorScheme[system];
+    if (color) {
+        // Apply color to map features belonging to this system or cluster
+        var geojsonLayer = L.geoJSON(systemGroups[system], {
+            style: function(feature) {
+                return {
+                    fillColor: color,
+                    fillOpacity: 0.5, // Adjust opacity as needed
+                    weight: 1, // Border width
+                    color: '#000' // Border color
+                };
+            }
+        }).addTo(map);
+    }
+});
